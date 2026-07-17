@@ -1,0 +1,10 @@
+{
+	email {$ACME_EMAIL}
+}
+
+{$DOMAIN} {
+	encode gzip
+
+	# Security headers are set by the nginx frontend; Caddy only terminates TLS.
+	reverse_proxy frontend:8080
+}

@@ -1,0 +1,93 @@
+services:
+  db:
+    image: postgis/postgis:16-3.4
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-leadintel}
+      POSTGRES_USER: ${POSTGRES_USER:-leadintel}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-leadintel} -d ${POSTGRES_DB:-leadintel}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  redis:
+    image: redis:7-alpine
+    command: ["sh", "-c", "redis-server --appendonly yes --requirepass \"$$REDIS_PASSWORD\""]
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD:?Set REDIS_PASSWORD in .env}
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli -a \"$$REDIS_PASSWORD\" ping | grep -q PONG"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  api:
+    build: ./backend
+    env_file: ${ENV_FILE:-.env}
+    command: ["sh", "-c", "alembic upgrade head && python -m app.bootstrap && uvicorn app.main:app --host 0.0.0.0 --port 8000"]
+    volumes:
+      - lead_data:/data
+    ports:
+      - "127.0.0.1:8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+
+  worker:
+    build: ./backend
+    env_file: ${ENV_FILE:-.env}
+    command: ["celery", "-A", "app.worker.celery_app", "worker", "--loglevel=INFO", "--concurrency=2"]
+    volumes:
+      - lead_data:/data
+    depends_on:
+      api:
+        condition: service_healthy
+
+  scheduler:
+    build: ./backend
+    env_file: ${ENV_FILE:-.env}
+    command: ["celery", "-A", "app.worker.celery_app", "beat", "--loglevel=INFO"]
+    volumes:
+      - lead_data:/data
+    depends_on:
+      api:
+        condition: service_healthy
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "127.0.0.1:8080:8080"
+    depends_on:
+      api:
+        condition: service_healthy
+
+  backup:
+    image: postgres:16-alpine
+    profiles: ["maintenance"]
+    environment:
+      PGPASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+    volumes:
+      - backups:/backups
+    depends_on:
+      db:
+        condition: service_healthy
+    entrypoint: ["sh", "-c"]
+    command: ["pg_dump -h db -U ${POSTGRES_USER:-leadintel} -d ${POSTGRES_DB:-leadintel} -Fc -f /backups/leadintel-$$(date -u +%Y%m%dT%H%M%SZ).dump"]
+
+volumes:
+  postgres_data:
+  redis_data:
+  lead_data:
+  backups:

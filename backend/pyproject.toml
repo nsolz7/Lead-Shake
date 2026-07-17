@@ -1,0 +1,47 @@
+[build-system]
+requires = ["setuptools>=70", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "lead-intelligence-pipeline"
+version = "0.1.0"
+description = "Evidence-backed commercial insurance lead intelligence workbench"
+requires-python = ">=3.12"
+dependencies = [
+  "alembic>=1.13,<2",
+  "celery[redis]>=5.4,<6",
+  "cryptography>=43,<47",
+  "duckdb>=1.1,<2",
+  "fastapi>=0.115,<1",
+  "fastexcel>=0.14,<1",
+  "httpx>=0.27,<1",
+  "openpyxl>=3.1,<4",
+  "phonenumbers>=8.13,<9",
+  "polars>=1.8,<2",
+  "psycopg[binary]>=3.2,<4",
+  "pydantic-settings>=2.5,<3",
+  "PyJWT>=2.9,<3",
+  "python-multipart>=0.0.12,<1",
+  "rapidfuzz>=3.9,<4",
+  "redis>=5,<6",
+  "selectolax>=0.3,<1",
+  "SQLAlchemy>=2.0,<3",
+  "tldextract>=5.1,<6",
+  "uvicorn[standard]>=0.30,<1"
+]
+
+[project.optional-dependencies]
+browser = ["playwright>=1.48,<2"]
+test = [
+  "pytest>=8.3,<9",
+  "pytest-asyncio>=0.24,<1",
+  "pytest-cov>=5,<7"
+]
+
+[tool.setuptools.packages.find]
+include = ["app*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+asyncio_mode = "auto"
