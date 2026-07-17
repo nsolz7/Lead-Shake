@@ -1,11 +1,11 @@
-import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
+import { FormEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Activity, ArrowDownToLine, BarChart3, CalendarDays, Check, ChevronRight, CircleAlert, Database,
   FileArchive, FileSearch, FlaskConical, GitMerge, LayoutDashboard, LogOut, Menu, Play, RefreshCw,
   Search, ShieldCheck, SlidersHorizontal, Upload, UserRoundSearch, X,
 } from "lucide-react";
 import { api, ApiError, downloadExport, login, logout, safeHref } from "./api";
-import { FishBadge, FishLogo, FishToggle } from "./fish";
+import { FishBadge, FishLogin, FishLogo, FishToggle, type FishLoginHandle } from "./fish";
 import { CalendarIntegrationPage } from "./CalendarIntegrationPage";
 import { ResearchQueuePage } from "./ResearchQueuePage";
 import type { Dashboard, ExportBatch, Lead, Meeting, Page, ResearchRun, Run, Source } from "./types";
@@ -49,7 +49,7 @@ function Score({ value, tier }: { value: number; tier: string }) {
   const alive = tier === "A" || tier === "B";
   return <div className="score-cell">
     <FishBadge alive={alive} />
-    <div className={`score score-${tone}`}><strong>{value}</strong><span>{tier}</span></div>
+    <div className={`score-text score-${tone}`}><strong>{value}</strong><span>{tier}</span></div>
   </div>;
 }
 
@@ -66,17 +66,25 @@ function Login({ onDone }: { onDone: () => void }) {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
+  const fishRef = useRef<FishLoginHandle>(null);
   async function submit(event: FormEvent) {
     event.preventDefault(); setBusy(true); setError("");
-    try { await login(username, password); onDone(); }
-    catch (err) { setError(err instanceof Error ? err.message : "Login failed"); }
-    finally { setBusy(false); }
+    try {
+      await login(username, password);
+      // correct credentials: the fish zaps back to life, then login continues
+      if (fishRef.current) fishRef.current.revive(onDone); else onDone();
+    } catch (err) {
+      fishRef.current?.shake();
+      setError(err instanceof Error ? err.message : "Login failed");
+      setBusy(false);
+    }
   }
   return <div className="login-shell">
-    <div className="login-brand"><span className="brand-mark"><FishLogo size={34} /></span><span>Lead Shake</span></div>
+    <div className="login-brand"><span>Lead Shake</span></div>
     <form className="login-card" onSubmit={submit}>
+      <div className="login-fish"><FishLogin ref={fishRef} /></div>
       <div><p className="eyebrow">Local workbench</p><h1>Commercial lead research, with receipts.</h1>
-        <p>Sign in to the private NC–SC–VA research workspace.</p></div>
+        <p>Sign in to revive the fish and open the private NC–SC–VA research workspace.</p></div>
       <label>Username<input value={username} onChange={(e) => setUsername(e.target.value)} autoComplete="username" /></label>
       <label>Password<input type="password" value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="current-password" autoFocus /></label>
       {error && <div className="alert"><CircleAlert size={16} />{error}</div>}
@@ -645,7 +653,7 @@ function App() {
   if (!authenticated) return <Login onDone={() => setAuthenticated(true)}/>;
   const active = NAV.find((x) => x.page === page)!;
   return <div className="app-shell">
-    <aside className={`sidebar ${sidebar ? "open" : ""}`}><div className="brand"><span className="brand-mark"><FishLogo /></span><div><strong>Lead Shake</strong><small>NC · SC · VA</small></div></div><nav>{NAV.map(({ page: p, label, icon: Icon }) => <button key={p} className={page === p ? "active" : ""} onClick={() => { setPage(p); setSidebar(false); }}><Icon size={18}/><span>{label}</span>{page === p && <ChevronRight size={15}/>}</button>)}</nav><div className="sidebar-foot"><div><span className="status-dot status-completed"/><small>Local private instance</small></div><button onClick={() => { void logout().finally(() => setAuthenticated(false)); }}><LogOut size={16}/>Sign out</button></div></aside>
+    <aside className={`sidebar ${sidebar ? "open" : ""}`}><div className="brand"><FishLogo size={62} /><div><strong>Lead Shake</strong><small>NC · SC · VA</small></div></div><nav>{NAV.map(({ page: p, label, icon: Icon }) => <button key={p} className={page === p ? "active" : ""} onClick={() => { setPage(p); setSidebar(false); }}><Icon size={18}/><span>{label}</span>{page === p && <ChevronRight size={15}/>}</button>)}</nav><div className="sidebar-foot"><div><span className="status-dot status-completed"/><small>Local private instance</small></div><button onClick={() => { void logout().finally(() => setAuthenticated(false)); }}><LogOut size={16}/>Sign out</button></div></aside>
     {sidebar && <div className="mobile-backdrop" onClick={() => setSidebar(false)}/>}<main><header className="topbar"><button className="mobile-menu" onClick={() => setSidebar(true)}><Menu/></button><div><active.icon size={17}/><span>{active.label}</span></div><div className="top-actions"><span className="environment"><span/>Local</span></div></header>{error && <div className="global-error"><CircleAlert size={16}/><span>{error}</span><button onClick={() => setError("")}><X size={15}/></button></div>}<div className="page-content">
       {page === "dashboard" && <DashboardPage openLeads={() => setPage("leads")}/>} {page === "research" && <ResearchQueuePage/>} {page === "leads" && <LeadsPage/>} {page === "matches" && <MatchesPage/>} {page === "runs" && <RunsPage/>} {page === "sources" && <SourcesPage/>} {page === "integrations" && <CalendarIntegrationPage/>} {page === "exports" && <ExportsPage/>} {page === "suppressions" && <SuppressionsPage/>}
     </div></main>

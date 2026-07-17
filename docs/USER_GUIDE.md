@@ -94,6 +94,47 @@ Each source displays:
 - whether it is healthy, stale, disabled, or reporting an error;
 - notes about important restrictions.
 
+### Status reference
+
+The displayed status uses the following order: **Disabled**, non-approved policy state such as **Pending**, **Manual only**, or **Blocked**, then **Error**, **Stale**, and finally **Healthy**.
+
+| Status | Meaning | Normal response |
+| --- | --- | --- |
+| Healthy | Enabled, policy-approved, no current error, and successfully used within its freshness period. | No action required. |
+| Stale | Approved and enabled, but it has never completed successfully or its last success is older than the source's freshness period. | Check credentials and configuration, then complete a successful run or import. New installations normally begin with stale sources. |
+| Manual only | The lookup, download, or entry must be performed by a person. Automation is intentionally prohibited. | Follow the documented manual process; do not approve automation simply to make the status green. |
+| Pending | Terms, licensing, retention rights, or the permitted acquisition method have not been reviewed and approved. | Review the current official terms and record the policy decision before use. |
+| Disabled | The source switch is off. | Enable it only when its configuration and policy state are appropriate. |
+| Error | The latest attempted operation failed. | Read the displayed error, correct the credential, schema, network, or source problem, then retry. A successful run clears the current error. |
+| Blocked | Policy review determined that the source must not be used. | Leave it disabled and use a permitted alternative. |
+
+Freshness is source-specific. For example, a seven-day source becomes stale sooner than a source with a 30- or 60-day window. **Stale is a warning, not an execution lock:** an enabled, approved source may still run and become healthy after that successful attempt.
+
+### What the switch does
+
+The switch changes only the source's `enabled` setting. Turning a source off prevents new standalone runs and causes automated enrichment to skip it. Turning it on does not:
+
+- approve the source policy or terms;
+- add a missing API key or User-Agent;
+- start a run or import;
+- authorize commercial usage or spending;
+- change a manual-only source into an automated source;
+- delete assertions, provenance, or other evidence already collected.
+
+Automatic free research has an additional safety dependency: **First-party business websites** must be enabled, approved for automation, and classified as an open/free source. If it is disabled or unapproved, the scheduled automatic research selector queues no accounts.
+
+### How an automated source becomes healthy
+
+1. Confirm that its policy status is **Approved** and its switch is on.
+2. Configure required credentials or identification, such as `SAM_GOV_API_KEY` or `SEC_USER_AGENT`.
+3. Enable the relevant feature flag, such as `FREE_API_RESEARCH_ENABLED=true`.
+4. Restart the API, worker, and scheduler after changing `.env`.
+5. Complete one successful research run, connector run, or official-file import for that source.
+
+Do not use "all sources healthy" as an operating goal. Sources marked **Manual only** are behaving correctly, and paid sources still require explicit authorization and hard spending ceilings even when enabled.
+
+If no sources are healthy, the application, CRM, saved evidence, policies, interactions, meetings, Calendar integration, and manual research still work. The practical consequence is reduced automated discovery and enrichment: research assessments contain more unresolved dimensions, contact briefs have less evidence, and fewer leads pass the contact-readiness gate.
+
 Use the switch to disable a source when:
 
 - its terms or access method need review;
