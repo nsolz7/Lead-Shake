@@ -2,6 +2,7 @@
 // the maintained GSAP 3 package. The animation is a direct port of the
 // hand-tuned Lead Shake master file, so loose typing here is intentional.
 declare module "gsap" {
+  export const gsap: any;
   export const TweenMax: any;
   export const TweenLite: any;
   export class TimelineMax {

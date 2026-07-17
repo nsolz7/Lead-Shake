@@ -78,8 +78,23 @@ In production the API marks session cookies `Secure` and disables `/docs`, `/red
 5. Resolve proposed matches; exact domains, phones, authoritative entity IDs, and known permit IDs link deterministically.
 6. Complete the generated manual SOS and workers' compensation tasks where protected portals require human lookup.
 7. Use **Interactions**, **Policies**, and **Meetings** on the same account. Scheduling requires a current contact-ready assessment or a reasoned audited override.
+
 8. Connect Google Calendar from **Calendar** only after configuring application OAuth. Attendee-visible fields never receive research, policy, relationship, or preparation notes.
 9. Export approved A–C leads. The ZIP contains XLSX, equivalent UTF-8 CSVs, and a manifest fingerprint.
+
+### Understanding Source Health
+
+The **Source health** page is an operational and policy dashboard:
+
+- **Healthy:** enabled, policy-approved, free of a current error, and successfully used within its freshness window.
+- **Stale:** approved and enabled, but never successfully used or older than its configured freshness window. A new installation normally starts with many stale sources.
+- **Manual only:** intentionally requires a person to perform the lookup or import; it should not be made automatic merely to obtain a green status.
+- **Pending:** terms, licensing, or the permitted acquisition method still require human review.
+- **Disabled:** the source switch is off. **Error** means its latest attempt failed. **Blocked** means policy review prohibits its use.
+
+The switch changes only whether the source is available for new work. It does not approve terms, add credentials, start a run, authorize paid usage, or erase previously collected evidence. To make an approved automated source healthy, configure any required credentials, enable its feature flag, restart the services, and complete one successful research or import attempt. You should not expect every source to become healthy: manual-only and protected-portal sources deliberately remain human-operated.
+
+The application still runs when no source is healthy, and stale status alone does not block an approved source from running. However, automated discovery and enrichment will be limited, research will contain more unresolved dimensions, and fewer leads will pass the contact-readiness gate. If the first-party website source is disabled or unapproved, automatic free-research queueing is also disabled. See [Source health in the user guide](docs/USER_GUIDE.md#source-health) for the complete operational reference.
 
 The Google connector stores only Place IDs. A user-confirmed live validation returns a transient attributed view that is not written to the lead graph. Hunter remains disabled per run until commercial use and a hard budget are explicitly supplied.
 

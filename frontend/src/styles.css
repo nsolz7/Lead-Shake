@@ -37,9 +37,8 @@ h3 { font-size: .95rem; }
 
 .app-shell { display: grid; min-height: 100vh; grid-template-columns: 244px 1fr; }
 .sidebar { position: sticky; z-index: 30; top: 0; display: flex; height: 100vh; flex-direction: column; padding: 22px 14px; color: var(--ink); background: linear-gradient(180deg, #fdfeff, #f4fafe); border-right: 1px solid var(--line); }
-.brand { display: flex; align-items: center; gap: 11px; padding: 0 9px 26px; }
-.brand-mark { display: grid; width: 42px; height: 42px; place-items: center; border: 1px solid #cfe9f6; border-radius: 11px; background: var(--bag); overflow: hidden; }
-.brand-mark svg { display: block; width: 36px; height: 36px; }
+.brand { display: flex; align-items: center; gap: 10px; padding: 2px 4px 22px; }
+.brand > svg { display: block; flex: none; }
 .brand div { display: flex; flex-direction: column; }
 .brand strong { font-size: .98rem; letter-spacing: -.02em; }
 .brand small { color: #7b8d99; font-size: .7rem; letter-spacing: .1em; }
@@ -63,13 +62,14 @@ main { min-width: 0; }
 .eyebrow { margin-bottom: 6px; color: var(--orange); font-size: .68rem; font-weight: 700; letter-spacing: .13em; text-transform: uppercase; }
 
 .easter-egg { display: flex; justify-content: center; margin: -6px 0 14px; }
-.easter-egg svg { display: block; width: 132px; height: auto; cursor: pointer; transition: transform .15s ease; }
+.easter-egg svg { display: block; width: 132px; height: auto; cursor: pointer; outline: none; transition: transform .15s ease; }
 .easter-egg svg:hover { transform: scale(1.05); }
+.easter-egg svg:focus-visible { outline: 3px solid var(--sky); outline-offset: 6px; border-radius: 20px; }
 @media (prefers-reduced-motion: reduce) { .easter-egg svg { transition: none; } .easter-egg svg:hover { transform: none; } }
 
-.score-cell { display: flex; align-items: center; gap: 6px; }
+.score-cell { display: flex; align-items: center; gap: 7px; }
 .fish-badge { flex: none; display: grid; place-items: center; }
-.fish-badge svg { display: block; width: 27px; height: auto; }
+.fish-badge svg { display: block; width: 34px; height: auto; }
 
 .button { display: inline-flex; min-height: 38px; align-items: center; justify-content: center; gap: 7px; padding: 8px 13px; border: 1px solid #cedbe4; border-radius: 8px; color: #33505e; background: #fff; font-weight: 600; font-size: .79rem; box-shadow: 0 1px 1px rgba(13,45,66,.03); }
 .button:hover { border-color: #a5bfd0; background: #f7fbfd; }
@@ -109,12 +109,12 @@ main { min-width: 0; }
 .badge-amber { color: var(--amber); background: var(--amber-soft); }
 .badge-red { color: var(--red); background: var(--red-soft); }
 .badge-blue { color: var(--blue); background: var(--blue-soft); }
-.score { display: grid; width: 45px; height: 45px; place-items: center; align-content: center; border: 1px solid #d5dfe6; border-radius: 10px; color: #5e6e78; background: #f4f7f9; line-height: 1; }
-.score strong { font-family: "Aptos Display", "Segoe UI", sans-serif; font-size: .93rem; }
-.score span { margin-top: 3px; font-size: .55rem; font-weight: 700; }
-.score-a { border-color: #f4cdb2; color: #b04a12; background: var(--orange-soft); }
-.score-b { border-color: #bfe2f5; color: var(--blue); background: var(--blue-soft); }
-.score-c { border-color: #edd7b5; color: var(--amber); background: var(--amber-soft); }
+.score-text { display: flex; flex-direction: column; align-items: flex-start; line-height: 1; color: #5e6e78; }
+.score-text strong { font-family: "Aptos Display", "Segoe UI", sans-serif; font-size: 1.08rem; letter-spacing: -.03em; }
+.score-text span { margin-top: 3px; font-size: .58rem; font-weight: 700; letter-spacing: .07em; opacity: .85; }
+.score-a { color: #b04a12; }
+.score-b { color: var(--blue); }
+.score-c { color: var(--amber); }
 
 .filter-bar { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
 .filter-bar input, .filter-bar select, .inline-form input, .form-panel input, .form-panel select, .form-panel textarea, .login-card input { border: 1px solid #d3dee6; border-radius: 8px; outline: none; color: #2e414d; background: #fff; }
@@ -362,8 +362,9 @@ button.table-row:hover { background: #f6fafd; }
 .global-error button { border: 0; color: inherit; background: transparent; }
 
 .login-shell { display: grid; min-height: 100vh; place-items: center; padding: 32px; background: radial-gradient(circle at 80% 15%, #d0edfc 0, transparent 30%), linear-gradient(145deg, #0b344d 0 43%, #f4f9fd 43%); }
-.login-brand { position: absolute; top: 27px; left: 30px; display: flex; align-items: center; gap: 10px; color: #fff; font-family: "Aptos Display", "Segoe UI", sans-serif; font-weight: 700; }
-.login-brand .brand-mark { background: #fff; }
+.login-brand { position: absolute; top: 27px; left: 30px; display: flex; align-items: center; gap: 10px; color: #fff; font-family: "Aptos Display", "Segoe UI", sans-serif; font-weight: 700; font-size: 1.15rem; letter-spacing: -.02em; }
+.login-fish { display: flex; justify-content: center; margin: -4px 0 6px; }
+.login-fish svg { display: block; width: 168px; height: auto; }
 .login-card { display: grid; width: min(430px, 94vw); gap: 4px; padding: 34px; border: 1px solid rgba(255,255,255,.8); border-radius: 16px; background: rgba(255,255,255,.96); box-shadow: 0 22px 70px rgba(7,42,64,.2); }
 .login-card h1 { font-size: 1.9rem; }
 .login-card > div > p:not(.eyebrow) { color: var(--muted); }
