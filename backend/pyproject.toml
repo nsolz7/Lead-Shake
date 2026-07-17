@@ -10,7 +10,7 @@ requires-python = ">=3.12"
 dependencies = [
   "alembic>=1.13,<2",
   "celery[redis]>=5.4,<6",
-  "cryptography>=43,<47",
+  "cryptography>=43,<50",
   "duckdb>=1.1,<2",
   "fastapi>=0.115,<1",
   "fastexcel>=0.14,<1",
